@@ -9,6 +9,7 @@ from PIL import Image
 from PIL.ExifTags import TAGS
 import json
 import stat
+from tqdm import tqdm
 
 arquivos = listdir('.')
 
@@ -41,31 +42,21 @@ def get_month_year(date):
   monthYear = monthString + " - " + str(year)
   return monthYear
 
-if path.isdir("SemInformacao"):
-  print 'Ja existe a pasta SemInformacao'
-else:
+if path.isdir("SemInformacao") != True:
   mkdir("SemInformacao")
 
 
-for arquivo in arquivos:
+for arquivo in tqdm(arquivos):
     if arquivo.endswith(".jpg") or arquivo.endswith(".jpeg"):
-      print "\n"
-      print "Arquivo: ", arquivo
       exif = get_exif("%s"%arquivo)
       if exif:
         labeled = get_labeled_exif(exif)
         if ('DateTimeOriginal' not in labeled):
           shutil.move("%s"%arquivo, path.basename("SemInformacao"))
           continue
-        print labeled['DateTimeOriginal']
         month_year = get_month_year(labeled['DateTimeOriginal'] if labeled['DateTimeOriginal'] else labeled['DateTime'] )
-        if path.isdir(month_year):
-          print 'Ja existe uma pasta com esse nome!'
-        else:
+        if path.isdir(month_year) != True:
           mkdir(month_year)
-          print 'Pasta criada com sucesso!'
-        print path.basename("%s"%month_year)
         shutil.move("%s"%arquivo, path.basename("%s"%month_year))
       else:
-        print("Desculpa, Imagem sem exif data.")
         shutil.move("%s"%arquivo, path.basename("SemInformacao"))
