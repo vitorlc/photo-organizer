@@ -16,6 +16,8 @@ arquivos = listdir('.')
 def get_exif(filename):
     image = Image.open(filename)
     image.verify()
+    image = Image.open(filename)
+    image.load()
     return image._getexif()
 
 def get_labeled_exif(exif):
@@ -47,9 +49,9 @@ if path.isdir("SemInformacao") != True:
 
 
 for arquivo in tqdm(arquivos):
-    if arquivo.endswith(".jpg") or arquivo.endswith(".jpeg"):
+    if arquivo.endswith(".jpg") or arquivo.endswith(".jpeg") or arquivo.endswith(".JPG") or arquivo.endswith(".JPEG")  :
       exif = get_exif("%s"%arquivo)
-      if exif:
+      if exif and exif != 'None':
         labeled = get_labeled_exif(exif)
         if ('DateTimeOriginal' not in labeled):
           shutil.move("%s"%arquivo, path.basename("SemInformacao"))
