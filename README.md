@@ -1,6 +1,5 @@
-# photo-organizer
+# Photo Organizer
 
-## Como usar:
-1 - Coloque todas as fotos no mesmo diretório fora de qualquer pasta.
+## Script Python para organizar suas fotos 
 
-2 - Execute o script ou o exe (Windows)
+OBS: EXE desatualizado
