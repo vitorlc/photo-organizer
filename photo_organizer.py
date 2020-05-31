@@ -5,6 +5,7 @@ from os import listdir
 from os import path
 from os import chmod
 from os import rmdir
+from os import rename
 import shutil
 from PIL import Image
 from PIL.ExifTags import TAGS
@@ -51,9 +52,9 @@ def get_month_year(date):
   monthYear = monthString + " - " + str(year)
   return monthYear
 
-def rename(arquivo, date):
-  print(aquivo)
-  print(date) 
+def get_name(arquivo, date):
+  name = date[8:-9]+"-"+date[5:-12]+"-"+date[:-15]+" "+date[11:-6]+"-"+date[14:-3]
+  return name
 
 def move_files(): 
   dest = '.'
@@ -66,36 +67,61 @@ def move_files():
             shutil.move(pathName +"/"+ fname2, dest)
         rmdir(fname)
 
-if path.isdir("SemInformacao") != True:
-  mkdir("SemInformacao")
+def main():
+  if path.isdir("SemInformacao") != True:
+    mkdir("SemInformacao")
 
-print("\n=====|=====| CONFIG |=====|=====")
+  print("\n=====|=====| CONFIG |=====|=====")
 
-print("Deseja retirar todas os aquivos de dentro das pastas? \n"
-      " S: Sim / N: Não ")
-retirar = input(">")
+  print("Deseja retirar todas os aquivos de dentro das pastas? \n"
+        " S: Sim / N: Não ")
+  retirar = input("> ")
 
-print("Deseja renomear as fotos e vídeos para : DD_MM_YYYY_QTD ? \n"
-      " S: Sim / N: Não ")
-renomear = input(">")
+  print("Deseja renomear as fotos para : DD-MM-YYYY HH-MM ? \n"
+        " S: Sim / N: Não ")
+  renomear = input("> ")
 
-print("\n\n")
+  print("Deseja organizar as fotos por pastas ? \n"
+        " S: Sim / N: Não ")
+  organizar = input("> ")
 
-if retirar == 'S':
-  move_files()
+  print("\n\n")
 
-for arquivo in tqdm(arquivos):
-    if arquivo.endswith(".jpg") or arquivo.endswith(".jpeg") or arquivo.endswith(".JPG") or arquivo.endswith(".JPEG")  :
-      exif = get_exif("%s"%arquivo)
-      if exif and exif != 'None':
-        labeled = get_labeled_exif(exif)
-        if ('DateTimeOriginal' not in labeled):
-          shutil.move("%s"%arquivo, path.basename("SemInformacao"))
-          continue
-        month_year = get_month_year(labeled['DateTimeOriginal'] if labeled['DateTimeOriginal'] else labeled['DateTime'] )
-        if path.isdir(month_year) != True:
-          mkdir(month_year)
-        # arquivo = rename(arquivo, labeled['DateTimeOriginal'])
-        shutil.move("%s"%arquivo, path.basename("%s"%month_year))
-      else:
-        shutil.move("%s"%arquivo, path.basename("SemInformacao"))
+  while True:
+    if retirar == 'S':
+      move_files()
+    if renomear == 'N' and organizar == 'N':
+      break
+
+    for arquivo in tqdm(arquivos):
+        if arquivo.endswith(".jpg") or arquivo.endswith(".jpeg") or arquivo.endswith(".JPG") or arquivo.endswith(".JPEG")  :
+          exif = get_exif("%s"%arquivo)
+          if exif and exif != 'None':
+            labeled = get_labeled_exif(exif)
+            if ('DateTimeOriginal' not in labeled):
+              shutil.move("%s"%arquivo, path.basename("SemInformacao"))
+              continue
+            month_year = get_month_year(labeled['DateTimeOriginal'] if labeled['DateTimeOriginal'] else labeled['DateTime'] )
+            if path.isdir(month_year) != True and organizar == 'S':
+              mkdir(month_year)
+            if renomear == 'S':
+              file_extension = path.splitext(arquivo)[1]
+              newName = get_name(arquivo, labeled['DateTimeOriginal'])
+              if path.exists(path.basename("%s"%month_year)+'/'+ newName + file_extension) and organizar == 'S':
+                i = 1
+                while path.exists(path.basename("%s"%month_year)+'/'+ newName + file_extension):
+                  newName += str(i)
+                  i += 1
+            if organizar == 'S' and renomear == 'S':
+              shutil.move("%s"%arquivo, path.basename("%s"%month_year))
+              rename(path.join(path.basename("%s"%month_year), arquivo), path.join(path.basename("%s"%month_year), newName+file_extension))
+            elif organizar == 'N' and renomear == 'S':
+              rename(path.join('.', arquivo), newName+file_extension)
+            elif organizar == 'S' and renomear == 'N':
+              shutil.move("%s"%arquivo, path.basename("%s"%month_year))
+          else:
+            shutil.move("%s"%arquivo, path.basename("SemInformacao"))
+    break
+
+if __name__ == "__main__":
+    main()
