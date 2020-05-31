@@ -121,6 +121,7 @@ def main():
               shutil.move("%s"%arquivo, path.basename("%s"%month_year))
           else:
             shutil.move("%s"%arquivo, path.basename("SemInformacao"))
+            continue
     break
 
 if __name__ == "__main__":
