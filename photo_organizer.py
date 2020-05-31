@@ -68,8 +68,6 @@ def move_files():
         rmdir(fname)
 
 def main():
-  if path.isdir("SemInformacao") != True:
-    mkdir("SemInformacao")
 
   print("\n=====|=====| CONFIG |=====|=====")
 
@@ -86,12 +84,18 @@ def main():
   organizar = input("> ")
 
   print("\n\n")
-
+  
   while True:
     if retirar == 'S':
       move_files()
+
     if renomear == 'N' and organizar == 'N':
       break
+
+    if path.isdir("SemInformacao"):
+      print('Ja existe a pasta SemInformacao')
+    else:
+      mkdir("SemInformacao")
 
     for arquivo in tqdm(arquivos):
         if arquivo.endswith(".jpg") or arquivo.endswith(".jpeg") or arquivo.endswith(".JPG") or arquivo.endswith(".JPEG")  :
@@ -99,7 +103,7 @@ def main():
           if exif and exif != 'None':
             labeled = get_labeled_exif(exif)
             if ('DateTimeOriginal' not in labeled):
-              shutil.move("%s"%arquivo, path.basename("SemInformacao"))
+              shutil.move("%s"%arquivo, path.basename("SemInformacao")) 
               continue
             month_year = get_month_year(labeled['DateTimeOriginal'] if labeled['DateTimeOriginal'] else labeled['DateTime'] )
             if path.isdir(month_year) != True and organizar == 'S':
@@ -120,8 +124,7 @@ def main():
             elif organizar == 'S' and renomear == 'N':
               shutil.move("%s"%arquivo, path.basename("%s"%month_year))
           else:
-            shutil.move("%s"%arquivo, path.basename("SemInformacao"))
-            continue
+            shutil.move("%s"%arquivo , path.basename("SemInformacao")) 
     break
 
 if __name__ == "__main__":
